@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		AF10756D2C883D6200B2A460 /* ProfileViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF10756C2C883D6200B2A460 /* ProfileViewController.swift */; };
+		AF5E90C72C8C55D2009057FA /* SingleImageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF5E90C62C8C55D2009057FA /* SingleImageViewController.swift */; };
 		AF980CFE2C5BA75200B7F8AE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF980CFD2C5BA75200B7F8AE /* AppDelegate.swift */; };
 		AF980D002C5BA75200B7F8AE /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF980CFF2C5BA75200B7F8AE /* SceneDelegate.swift */; };
 		AF980D022C5BA75200B7F8AE /* ImagesListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF980D012C5BA75200B7F8AE /* ImagesListViewController.swift */; };
@@ -17,6 +19,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		AF10756C2C883D6200B2A460 /* ProfileViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewController.swift; sourceTree = "<group>"; };
+		AF5E90C62C8C55D2009057FA /* SingleImageViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SingleImageViewController.swift; sourceTree = "<group>"; };
 		AF980CFA2C5BA75200B7F8AE /* ImageFeed.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ImageFeed.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AF980CFD2C5BA75200B7F8AE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		AF980CFF2C5BA75200B7F8AE /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -39,6 +43,22 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		AF10756B2C883D4E00B2A460 /* Profile */ = {
+			isa = PBXGroup;
+			children = (
+				AF10756C2C883D6200B2A460 /* ProfileViewController.swift */,
+			);
+			path = Profile;
+			sourceTree = "<group>";
+		};
+		AF5E90C82C8C58FC009057FA /* SingleImage */ = {
+			isa = PBXGroup;
+			children = (
+				AF5E90C62C8C55D2009057FA /* SingleImageViewController.swift */,
+			);
+			path = SingleImage;
+			sourceTree = "<group>";
+		};
 		AF980CF12C5BA75200B7F8AE = {
 			isa = PBXGroup;
 			children = (
@@ -58,7 +78,9 @@
 		AF980CFC2C5BA75200B7F8AE /* ImageFeed */ = {
 			isa = PBXGroup;
 			children = (
+				AF10756B2C883D4E00B2A460 /* Profile */,
 				AF9EC19D2C75ED5200BB6E73 /* ImagesList */,
+				AF5E90C82C8C58FC009057FA /* SingleImage */,
 				AF980CFD2C5BA75200B7F8AE /* AppDelegate.swift */,
 				AF980CFF2C5BA75200B7F8AE /* SceneDelegate.swift */,
 				AF980D032C5BA75200B7F8AE /* Main.storyboard */,
@@ -149,9 +171,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AF10756D2C883D6200B2A460 /* ProfileViewController.swift in Sources */,
 				AF980D022C5BA75200B7F8AE /* ImagesListViewController.swift in Sources */,
 				AF9EC19C2C75ED0F00BB6E73 /* ImagesListCell.swift in Sources */,
 				AF980CFE2C5BA75200B7F8AE /* AppDelegate.swift in Sources */,
+				AF5E90C72C8C55D2009057FA /* SingleImageViewController.swift in Sources */,
 				AF980D002C5BA75200B7F8AE /* SceneDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
