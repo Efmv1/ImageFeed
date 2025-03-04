@@ -10,6 +10,10 @@ struct OAuthTokenResponseBody: Decodable {
     }
 }
 
+enum AuthServiceError: Error {
+    case invalidRequest
+}
+
 final class OAuth2Service {
     private enum httpMethods: String {
         case get = "GET"
@@ -21,29 +25,51 @@ final class OAuth2Service {
     static let shared = OAuth2Service()
     private init() {}
     
+    private let urlSession = URLSession.shared
+    
+    private var task: URLSessionTask?
+    private var lastCode: String?
+    
     
     func fetchOAuthToken(code: String, completion: @escaping (Result<String, Error>) -> Void) {
-        guard let url = makeOAuthTokenURL(code: code) else { return }
+        assert(Thread.isMainThread)
+        guard lastCode != code else {
+            completion(.failure(AuthServiceError.invalidRequest))
+            return
+        }
+        
+        task?.cancel()
+        lastCode = code
+        
+        guard let url = makeOAuthTokenURL(code: code) else {
+            assertionFailure("Failed to create URL")
+            return
+        }
         
         var request = URLRequest(url: url)
         request.httpMethod = httpMethods.post.rawValue
         
-        let task = URLSession.shared.data(for: request) { result in
-            switch result {
-            case .failure(let error):
-                print(error)
-                completion(.failure(error))
-            case .success(let data):
-                do {
-                    let token = try JSONDecoder().decode(OAuthTokenResponseBody.self, from: data)
-                    completion(.success(token.accessToken))
-                } catch {
+        let task = URLSession.shared.data(for: request) { [weak self] result in
+            DispatchQueue.main.async {
+                switch result {
+                case .failure(let error):
                     print(error)
                     completion(.failure(error))
+                case .success(let data):
+                    do {
+                        let token = try JSONDecoder().decode(OAuthTokenResponseBody.self, from: data)
+                        completion(.success(token.accessToken))
+                    } catch {
+                        print(error)
+                        completion(.failure(error))
+                    }
                 }
+                self?.task = nil
+                self?.lastCode = nil
             }
         }
         
+        self.task = task
         task.resume()
     }
     

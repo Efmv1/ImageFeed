@@ -32,14 +32,38 @@ final class ProfileViewController: UIViewController {
         return label
     }()
     
+    var profileService = ProfileService.shared
+    private var profileImageServiceObserver: NSObjectProtocol?
+    
     // MARK: - View Life Cycles
     override func viewDidLoad() {
-        presentProfilePhoto()
+        super.viewDidLoad()
+        profileImageServiceObserver = NotificationCenter.default
+                    .addObserver(
+                        forName: ProfileImageService.didChangeNotification,
+                        object: nil,
+                        queue: .main
+                    ) { [weak self] _ in
+                        guard let self = self else { return }
+                        self.updateAvatar()
+                    }
+                updateAvatar()
         
+        presentProfilePhoto()
     }
     
     // MARK: - Private Methods
+    private func updateAvatar() {
+            guard
+                let profileImageURL = ProfileImageService.shared.avatarURL,
+                let url = URL(string: profileImageURL)
+            else { return }
+            // TODO [Sprint 11] Обновить аватар, используя Kingfisher
+        }
+    
     private func presentProfilePhoto() {
+        updateProfileDetails()
+        
         [imageView, nameLabel, nicknameLabel, statusLabel].forEach{
             $0.translatesAutoresizingMaskIntoConstraints = false
             view.addSubview($0)
@@ -71,6 +95,12 @@ final class ProfileViewController: UIViewController {
         
         exitButton.centerYAnchor.constraint(equalTo: imageView.centerYAnchor).isActive = true
         exitButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16).isActive = true
+    }
+    
+    private func updateProfileDetails() {
+        nameLabel.text = profileService.profileInfo?.name
+        nicknameLabel.text = profileService.profileInfo?.loginName
+        statusLabel.text = profileService.profileInfo?.bio
     }
     
     @objc private func didExitButtonTaped() {
