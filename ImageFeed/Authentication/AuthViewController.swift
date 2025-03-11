@@ -8,7 +8,7 @@ final class AuthViewController: UIViewController {
             guard
                 let viewController = segue.destination as? WebViewViewController
             else {
-                assertionFailure("Invalid segue destination")
+                assertionFailure("[AuthViewController]: Invalid segue destination")
                 return
             }
             
@@ -35,23 +35,35 @@ final class AuthViewController: UIViewController {
         navigationItem.backBarButtonItem = UIBarButtonItem(title: "", style: .plain, target: nil, action: nil)
         navigationItem.backBarButtonItem?.tintColor = UIColor(named: "YP Black")
     }
+    
+    //MARK: - Public Properties
+    weak var delegate: AuthViewControllerDelegate?
 }
 
 extension AuthViewController: WebViewViewControllerDelegate {
     func webViewViewController(_ vc: WebViewViewController, didAuthenticateWithCode code: String) {
-        UIBlockingProgressHUD.show()
-        oauth2Service.fetchOAuthToken(code: code) { [weak self] result in
+        DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
-            switch result {
-            case .failure(let error):
-                print(error)
-                UIBlockingProgressHUD.dismiss()
-            case .success(let bearerToken):
-                tokenStorage.newToken(bearerToken)
-                UIBlockingProgressHUD.dismiss()
-            }
-            
             vc.dismiss(animated: true)
+            
+            UIBlockingProgressHUD.show()
+            self.oauth2Service.fetchOAuthToken(code: code) { result in
+                switch result {
+                case .failure(let error):
+                    print("[AuthViewController]: \(error.localizedDescription)")
+                    UIBlockingProgressHUD.dismiss()
+                    let alert = UIAlertController(
+                        title: "Что-то пошло не так",
+                        message: "Не удалось войти в систему",
+                        preferredStyle: .alert)
+                    alert.addAction(UIAlertAction(title: "OK", style: .default))
+                    self.present(alert, animated: true, completion: nil)
+                case .success(let bearerToken):
+                    self.tokenStorage.newToken(bearerToken)
+                    UIBlockingProgressHUD.dismiss()
+                    self.delegate?.didAuthenticate(self)
+                }
+            }
         }
     }
     

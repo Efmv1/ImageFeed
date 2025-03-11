@@ -43,52 +43,44 @@ final class ProfileService {
             return
         }
         
-        guard let request = createProfileRequest() else { return }
-        let task = URLSession.shared.objectTask(for: request, decoder: ProfileResult) {result in
-            switch result {
-            case .success(let data):
-                let profile = data
-            case .failure(let error):
-                print(error)
+        guard let request = createProfileRequest() else {
+            assertionFailure("Failed to create URL")
+            return
+        }
+        let task = URLSession.shared.objectTask(
+            for: request
+        ) { [weak self] (result: Result<ProfileResult, Error>) in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let data):
+                    let profile = Profile(username: data.username,
+                                          name: data.name,
+                                          bio: data.bio)
+                    completion(.success(profile))
+                case .failure(let error):
+                    print("[ProfileService]: \(error.localizedDescription)")
+                    completion(.failure(error))
+                }
+                self?.task = nil
             }
-            
-            //        let task = URLSession.shared.data(for: request) { [weak self] result in
-            //            DispatchQueue.main.async {
-            //                switch result {
-            //                case .failure(let error):
-            //                    print(error)
-            //                    completion(.failure(error))
-            //                case .success(let data):
-            //                    do {
-            //                        let response = try JSONDecoder().decode(ProfileResult.self, from: data)
-            //                        let profile = Profile(username: response.username,
-            //                                              name: response.name,
-            //                                              bio: response.bio)
-            //                        completion(.success(profile))
-            //                    } catch {
-            //                        print(error)
-            //                        completion(.failure(error))
-            //                    }
-            //                }
-            self?.task = nil
         }
         
         self.task = task
         task.resume()
     }
+}
+
+private func createProfileRequest() -> URLRequest? {
+    let url = URL(string: "\(Constants.defaultBaseURL?.absoluteString ?? "https://api.unsplash.com")/me")
     
-    private func createProfileRequest() -> URLRequest? {
-        let url = URL(string: "\(Constants.defaultBaseURL?.absoluteString ?? "https://api.unsplash.com")/me")
-        
-        guard
-            let token = OAuth2TokenStorage.shared.token,
-            let url = url
-        else { return nil }
-        
-        var request = URLRequest(url: url)
-        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        
-        
-        return request
-    }
+    guard
+        let token = OAuth2TokenStorage.shared.token,
+        let url = url
+    else { return nil }
+    
+    var request = URLRequest(url: url)
+    request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+    
+    
+    return request
 }

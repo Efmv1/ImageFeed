@@ -1,9 +1,10 @@
 import UIKit
+import Kingfisher
 
 final class ProfileViewController: UIViewController {
     // MARK: - Private Properties
     private var imageView: UIImageView = {
-        let image = UIImage(named: "profilePhoto")
+        let image = UIImage(named: "stub")
         let view = UIImageView(image: image)
         return view
     }()
@@ -35,21 +36,21 @@ final class ProfileViewController: UIViewController {
     var profileService = ProfileService.shared
     private var profileImageServiceObserver: NSObjectProtocol?
     
-    // MARK: - View Life Cycles
+    // MARK: - View Life Cycles    
     override func viewDidLoad() {
         super.viewDidLoad()
         profileImageServiceObserver = NotificationCenter.default
-                    .addObserver(
-                        forName: ProfileImageService.didChangeNotification,
-                        object: nil,
-                        queue: .main
-                    ) { [weak self] _ in
-                        guard let self = self else { return }
-                        self.updateAvatar()
-                    }
-                updateAvatar()
+            .addObserver(
+                forName: ProfileImageService.didChangeNotification,
+                object: nil,
+                queue: .main
+            ) { [weak self] _ in
+                guard let self = self else { return }
+                self.updateAvatar()
+            }
+        updateAvatar()
         
-        presentProfilePhoto()
+        presentProfile()
     }
     
     // MARK: - Private Methods
@@ -58,11 +59,16 @@ final class ProfileViewController: UIViewController {
                 let profileImageURL = ProfileImageService.shared.avatarURL,
                 let url = URL(string: profileImageURL)
             else { return }
-            // TODO [Sprint 11] Обновить аватар, используя Kingfisher
+        imageView.kf.indicatorType = .activity
+        let processor = RoundCornerImageProcessor(cornerRadius: 61)
+        imageView.kf.setImage(with: url,
+                              options: [.processor(processor)])
         }
     
-    private func presentProfilePhoto() {
+    private func presentProfile() {
         updateProfileDetails()
+        
+        view.backgroundColor = .ypBlack
         
         [imageView, nameLabel, nicknameLabel, statusLabel].forEach{
             $0.translatesAutoresizingMaskIntoConstraints = false

@@ -2,23 +2,16 @@ import Foundation
 
 final class ProfileImageService {
     struct UserResult: Codable {
-        let images: [String]
+        let items: [String: String]
         
         private enum CodingKeys: String, CodingKey {
-            case images = "profile_image"
+            case items = "profile_image"
         }
     }
     
-//    struct UserImage: Codable {
-//        let image: URL?
-//        
-//        private enum CodingKeys: String, CodingKey {
-//            case image = "small"
-//        }
-//    }
-    
     enum ProfileImageServiceError: Error {
         case invalidRequest
+        case unwrappingError
     }
     
     static let shared = ProfileImageService()
@@ -37,27 +30,27 @@ final class ProfileImageService {
             return
         }
         
-        guard let request = createProfileImageRequest(username) else { return }
-        let task = URLSession.shared.data(for: request) { [weak self] result in
+        guard let request = createProfileImageRequest(username) else {
+            assertionFailure("Failed to create URL")
+            return
+        }
+        let task = URLSession.shared.objectTask(
+            for: request
+        ) { [weak self] (result: Result<UserResult, Error>) in
             DispatchQueue.main.async {
                 switch result {
                 case .failure(let error):
-                    print(error)
+                    print("[ProfileImageService]: \(error.localizedDescription)")
                     completion(.failure(error))
-                case .success(let data):
-                    do {
-                        let response = try JSONDecoder().decode(UserResult.self, from: data)
-                        self?.avatarURL = response.images.first
-                        NotificationCenter.default
-                            .post(
-                                name: ProfileImageService.didChangeNotification,
-                                object: self,
-                                userInfo: ["URL": response.images.first])
-                        completion(.success(response.images.first))
-                    } catch {
-                        print(error)
-                        completion(.failure(error))
-                    }
+                case .success(let response):
+                    let smallURL = response.items["small"]
+                    self?.avatarURL = smallURL
+                    NotificationCenter.default
+                        .post(
+                            name: ProfileImageService.didChangeNotification,
+                            object: self,
+                            userInfo: ["URL": smallURL as Any])
+                    completion(.success(smallURL))
                 }
                 self?.task = nil
             }
@@ -68,7 +61,7 @@ final class ProfileImageService {
     }
     
     private func createProfileImageRequest(_ username: String) -> URLRequest? {
-        let url = URL(string: "\(Constants.defaultBaseURL?.absoluteString ?? "https://api.unsplash.com")/users/:\(username)")
+        let url = URL(string: "\(Constants.defaultBaseURL?.absoluteString ?? "https://api.unsplash.com")/users/\(username)")
         
         guard
             let token = OAuth2TokenStorage.shared.token,
