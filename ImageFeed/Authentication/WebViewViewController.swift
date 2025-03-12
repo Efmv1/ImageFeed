@@ -1,7 +1,7 @@
 import UIKit
 import WebKit
 
-final class WebViewViewController: UIViewController {    
+final class WebViewViewController: UIViewController {
     // MARK: - Outlets
     @IBOutlet private var webView: WKWebView!
     @IBOutlet private var progressView: UIProgressView!
@@ -12,12 +12,12 @@ final class WebViewViewController: UIViewController {
         webView.navigationDelegate = self
         
         estimatedProgressObservation = webView.observe(
-                    \.estimatedProgress,
-                    options: [],
-                    changeHandler: { [weak self] _, _ in
-                        guard let self = self else { return }
-                        self.updateProgress()
-                    })
+            \.estimatedProgress,
+             options: [],
+             changeHandler: { [weak self] _, _ in
+                 guard let self = self else { return }
+                 self.updateProgress()
+             })
         
         loadAuthView()
     }

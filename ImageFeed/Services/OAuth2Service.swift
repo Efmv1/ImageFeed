@@ -2,11 +2,9 @@ import Foundation
 
 struct OAuthTokenResponseBody: Decodable {
     let accessToken: String
-    let tokenType: String
     
     private enum CodingKeys: String, CodingKey {
         case accessToken = "access_token"
-        case tokenType = "token_type"
     }
 }
 
@@ -25,8 +23,9 @@ final class OAuth2Service {
     static let shared = OAuth2Service()
     private init() {}
     
-    private let urlSession = URLSession.shared
+    private let tokenStorage = OAuth2TokenStorage.shared
     
+    private let urlSession = URLSession.shared
     private var task: URLSessionTask?
     private var lastCode: String?
     
@@ -34,6 +33,7 @@ final class OAuth2Service {
     func fetchOAuthToken(code: String, completion: @escaping (Result<String, Error>) -> Void) {
         assert(Thread.isMainThread)
         guard lastCode != code else {
+            print("[OAuthService]: Request already in work")
             completion(.failure(AuthServiceError.invalidRequest))
             return
         }
@@ -42,7 +42,7 @@ final class OAuth2Service {
         lastCode = code
         
         guard let url = makeOAuthTokenURL(code: code) else {
-            assertionFailure("Failed to create URL")
+            assertionFailure("[OAuthService]: Failed to create URL")
             return
         }
         
@@ -53,11 +53,11 @@ final class OAuth2Service {
         ){ [weak self] (result: Result<OAuthTokenResponseBody, Error>) in
             DispatchQueue.main.async {
                 switch result {
+                case .success(let response):
+                    completion(.success(response.accessToken))
                 case .failure(let error):
                     print("[OAuth2Service]: \(error.localizedDescription)")
                     completion(.failure(error))
-                case .success(let response):
-                    completion(.success(response.accessToken))
                 }
                 self?.task = nil
                 self?.lastCode = nil

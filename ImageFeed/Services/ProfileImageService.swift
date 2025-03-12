@@ -17,7 +17,7 @@ final class ProfileImageService {
     static let shared = ProfileImageService()
     private init() {}
     
-    private (set) var avatarURL: String?
+    private(set) var avatarURL: String?
     static let didChangeNotification = Notification.Name(rawValue: "ProfileImageProviderDidChange")
     private var task: URLSessionTask?
     
@@ -25,13 +25,13 @@ final class ProfileImageService {
         assert(Thread.isMainThread)
         
         guard task == nil else {
-            print("Запрос уже выполняется")
+            print("[ProfileImageService]: Request already in work")
             completion(.failure(ProfileImageServiceError.invalidRequest))
             return
         }
         
         guard let request = createProfileImageRequest(username) else {
-            assertionFailure("Failed to create URL")
+            assertionFailure("[ProfileImageService]: Failed to create URL")
             return
         }
         let task = URLSession.shared.objectTask(
@@ -39,18 +39,18 @@ final class ProfileImageService {
         ) { [weak self] (result: Result<UserResult, Error>) in
             DispatchQueue.main.async {
                 switch result {
-                case .failure(let error):
-                    print("[ProfileImageService]: \(error.localizedDescription)")
-                    completion(.failure(error))
                 case .success(let response):
-                    let smallURL = response.items["small"]
-                    self?.avatarURL = smallURL
+                    let url = response.items["large"]
+                    self?.avatarURL = url
                     NotificationCenter.default
                         .post(
                             name: ProfileImageService.didChangeNotification,
                             object: self,
-                            userInfo: ["URL": smallURL as Any])
-                    completion(.success(smallURL))
+                            userInfo: ["URL": url as Any])
+                    completion(.success(url))
+                case .failure(let error):
+                    print("[ProfileImageService]: \(error.localizedDescription)")
+                    completion(.failure(error))
                 }
                 self?.task = nil
             }

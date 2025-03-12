@@ -14,23 +14,27 @@ final class SplashViewController: UIViewController {
     
     
     override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        
+        super.viewDidAppear(true)
         presentSplashView()
         
         if tokenStorage.token != nil {
             profileService.fetchProfile() { [weak self] result in
                 guard let self = self else { return }
                 switch result {
-                case .failure(let error):
-                    print(error)
                 case .success(let data):
+                    showTabBar()
                     self.profileService.profileInfo = data
-                    profileImageService.fetchProfileImageURL(username: data.username) { error in
-                        print(error)
+                    profileImageService.fetchProfileImageURL(username: data.username) { result in
+                        switch result {
+                        case .success(_):
+                            break
+                        case .failure(let error):
+                            print("[SplashViewController]: \(error.localizedDescription)")
+                        }
                     }
+                case .failure(let error):
+                    print("[SplashViewController]: \(error.localizedDescription)")
                 }
-                showTabBar()
             }
         } else {
             showAuthView()
@@ -64,20 +68,23 @@ final class SplashViewController: UIViewController {
         let storyboard = UIStoryboard(name: "Main", bundle: .main)
         guard let authViewController = storyboard.instantiateViewController(withIdentifier: "AuthViewController") as? AuthViewController else { return }
         authViewController.delegate = self
+        authViewController.modalPresentationStyle = .fullScreen
         
+        show(authViewController, sender: nil)
         
-        let navigationController = storyboard.instantiateViewController(
-            withIdentifier: "NavigationController"
-        )
-        navigationController.modalPresentationStyle = .fullScreen
-        
-        present(navigationController, animated: true)
+//        let navigationController = storyboard.instantiateViewController(
+//            withIdentifier: "NavigationController"
+//        )
+//        navigationController.modalPresentationStyle = .fullScreen
+//        
+//        present(navigationController, animated: true)
     }
 }
 
 extension SplashViewController: AuthViewControllerDelegate {
     func didAuthenticate(_ vc: AuthViewController) {
         vc.dismiss(animated: true)
+        
         showTabBar()
     }
 }

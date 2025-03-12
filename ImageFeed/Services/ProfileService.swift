@@ -13,12 +13,6 @@ final class ProfileService {
         let username: String
         var name: String
         let bio: String?
-        
-        private enum CodingKeys: String, CodingKey {
-            case username = "username"
-            case name = "name"
-            case bio = "bio"
-        }
     }
     
     struct Profile {
@@ -36,15 +30,14 @@ final class ProfileService {
     
     func fetchProfile(completion: @escaping (Result<Profile, Error>) -> Void) {
         assert(Thread.isMainThread)
-        
         guard task == nil else {
-            print("Запрос уже выполняется")
+            print("[ProfileService]: Request already in work")
             completion(.failure(ProfileServiceError.invalidRequest))
             return
         }
         
         guard let request = createProfileRequest() else {
-            assertionFailure("Failed to create URL")
+            assertionFailure("[ProfileService]: Failed to create URL")
             return
         }
         let task = URLSession.shared.objectTask(
@@ -68,19 +61,19 @@ final class ProfileService {
         self.task = task
         task.resume()
     }
-}
-
-private func createProfileRequest() -> URLRequest? {
-    let url = URL(string: "\(Constants.defaultBaseURL?.absoluteString ?? "https://api.unsplash.com")/me")
     
-    guard
-        let token = OAuth2TokenStorage.shared.token,
-        let url = url
-    else { return nil }
-    
-    var request = URLRequest(url: url)
-    request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-    
-    
-    return request
+    private func createProfileRequest() -> URLRequest? {
+        let url = URL(string: "\(Constants.defaultBaseURL?.absoluteString ?? "https://api.unsplash.com")/me")
+        
+        guard
+            let token = OAuth2TokenStorage.shared.token,
+            let url = url
+        else { return nil }
+        
+        var request = URLRequest(url: url)
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        
+        return request
+    }
 }

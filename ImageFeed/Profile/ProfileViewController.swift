@@ -33,7 +33,7 @@ final class ProfileViewController: UIViewController {
         return label
     }()
     
-    var profileService = ProfileService.shared
+    private let profileService = ProfileService.shared
     private var profileImageServiceObserver: NSObjectProtocol?
     
     // MARK: - View Life Cycles    

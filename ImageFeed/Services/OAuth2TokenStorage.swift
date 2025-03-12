@@ -1,24 +1,20 @@
-import Foundation
 import SwiftKeychainWrapper
 
 final class OAuth2TokenStorage {
-    enum OAuthTokenStorageError: Error {
-        case savingError
-    }
     static let shared = OAuth2TokenStorage()
     private init () {}
     
-    private let tokenKey = "token"
+    private let tokenKey = "Auth token"
     
-    var token: String? {
+    private(set) var token: String? {
         get {
-            KeychainWrapper.standard.string(forKey: "Auth token")
+            KeychainWrapper.standard.string(forKey: tokenKey)
         }
         set {
             guard let token = newValue else { return }
-            let isSuccess = KeychainWrapper.standard.set(token, forKey: "Auth token")
+            let isSuccess = KeychainWrapper.standard.set(token, forKey: tokenKey)
             guard isSuccess else {
-                print(OAuthTokenStorageError.savingError)
+                print("[OAuthTokenStorage]: Saving error")
                 return
             }
         }
