@@ -1,4 +1,5 @@
 import UIKit
+import ProgressHUD
 
 final class AuthViewController: UIViewController {
     
@@ -7,7 +8,7 @@ final class AuthViewController: UIViewController {
             guard
                 let viewController = segue.destination as? WebViewViewController
             else {
-                assertionFailure("Invalid segue destination")
+                assertionFailure("[AuthViewController]: Invalid segue destination")
                 return
             }
             
@@ -19,7 +20,6 @@ final class AuthViewController: UIViewController {
     
     // MARK: - Private Properties
     private let showWebViewSegueIdentifier = "ShowWebView"
-    private let tokenStorage = OAuth2TokenStorage.shared
     private let oauth2Service = OAuth2Service.shared
     
     // MARK: - View Life Cycles
@@ -34,20 +34,33 @@ final class AuthViewController: UIViewController {
         navigationItem.backBarButtonItem = UIBarButtonItem(title: "", style: .plain, target: nil, action: nil)
         navigationItem.backBarButtonItem?.tintColor = UIColor(named: "YP Black")
     }
+    
+    //MARK: - Public Properties
+    weak var delegate: AuthViewControllerDelegate?
 }
 
 extension AuthViewController: WebViewViewControllerDelegate {
     func webViewViewController(_ vc: WebViewViewController, didAuthenticateWithCode code: String) {
+        vc.dismiss(animated: true)
+        UIBlockingProgressHUD.show()
+        
         oauth2Service.fetchOAuthToken(code: code) { [weak self] result in
             guard let self = self else { return }
             switch result {
+            case .success(let token):
+                OAuth2TokenStorage.shared.newToken(token)
+                UIBlockingProgressHUD.dismiss()
+                delegate?.didAuthenticate(self)
             case .failure(let error):
-                print(error)
-            case .success(let bearerToken):
-                tokenStorage.newToken(bearerToken)
+                print("[AuthViewController]: \(error.localizedDescription)")
+                UIBlockingProgressHUD.dismiss()
+                let alert = UIAlertController(
+                    title: "Что-то пошло не так",
+                    message: "Не удалось войти в систему",
+                    preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: "OK", style: .default))
+                self.present(alert, animated: true, completion: nil)
             }
-            
-            vc.dismiss(animated: true)
         }
     }
     

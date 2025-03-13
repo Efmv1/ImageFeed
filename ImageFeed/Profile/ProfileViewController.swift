@@ -1,9 +1,10 @@
 import UIKit
+import Kingfisher
 
 final class ProfileViewController: UIViewController {
     // MARK: - Private Properties
     private var imageView: UIImageView = {
-        let image = UIImage(named: "profilePhoto")
+        let image = UIImage(named: "stub")
         let view = UIImageView(image: image)
         return view
     }()
@@ -32,14 +33,43 @@ final class ProfileViewController: UIViewController {
         return label
     }()
     
-    // MARK: - View Life Cycles
+    private let profileService = ProfileService.shared
+    private var profileImageServiceObserver: NSObjectProtocol?
+    
+    // MARK: - View Life Cycles    
     override func viewDidLoad() {
-        presentProfilePhoto()
+        super.viewDidLoad()
+        profileImageServiceObserver = NotificationCenter.default
+            .addObserver(
+                forName: ProfileImageService.didChangeNotification,
+                object: nil,
+                queue: .main
+            ) { [weak self] _ in
+                guard let self = self else { return }
+                self.updateAvatar()
+            }
+        updateAvatar()
         
+        presentProfile()
     }
     
     // MARK: - Private Methods
-    private func presentProfilePhoto() {
+    private func updateAvatar() {
+            guard
+                let profileImageURL = ProfileImageService.shared.avatarURL,
+                let url = URL(string: profileImageURL)
+            else { return }
+        imageView.kf.indicatorType = .activity
+        let processor = RoundCornerImageProcessor(cornerRadius: 61)
+        imageView.kf.setImage(with: url,
+                              options: [.processor(processor)])
+        }
+    
+    private func presentProfile() {
+        updateProfileDetails()
+        
+        view.backgroundColor = .ypBlack
+        
         [imageView, nameLabel, nicknameLabel, statusLabel].forEach{
             $0.translatesAutoresizingMaskIntoConstraints = false
             view.addSubview($0)
@@ -71,6 +101,12 @@ final class ProfileViewController: UIViewController {
         
         exitButton.centerYAnchor.constraint(equalTo: imageView.centerYAnchor).isActive = true
         exitButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16).isActive = true
+    }
+    
+    private func updateProfileDetails() {
+        nameLabel.text = profileService.profileInfo?.name
+        nicknameLabel.text = profileService.profileInfo?.loginName
+        statusLabel.text = profileService.profileInfo?.bio
     }
     
     @objc private func didExitButtonTaped() {
