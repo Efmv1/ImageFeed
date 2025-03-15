@@ -10,17 +10,12 @@ final class ImagesListService {
     private var task: URLSessionTask?
     static let didChangeNotification = Notification.Name(rawValue: "ImagesListServiceDidChange")
     
-    enum ImagesListServiceError: Error {
-        case invalidRequest
-    }
-    
-    func fetchPhotosNextPage(completion: @escaping (Result<[Photo], Error>) -> Void) {
+    func fetchPhotosNextPage() {
         let nextPage = lastLoadedPage ?? 0 + 1
         
         assert(Thread.isMainThread)
         guard task == nil else {
             print("[ImagesListService]: Request already in work")
-            completion(.failure(ImagesListServiceError.invalidRequest))
             return
         }
         
@@ -36,7 +31,7 @@ final class ImagesListService {
             DispatchQueue.main.async {
                 switch result {
                 case .success(let response):
-                    for item in response {
+                    response.forEach { item in
                         self.photos.append(Photo(id: item.id,
                                                  size: CGSize(width: item.width, height: item.height),
                                                  createdAt: item.createdAt,
@@ -46,17 +41,18 @@ final class ImagesListService {
                                                  isLiked: item.isLiked))
                     }
                     
+                    
                     NotificationCenter.default
                         .post(
                             name: ImagesListService.didChangeNotification,
                             object: self,
                             userInfo: ["Photos": self.photos as Any])
-                    completion(.success(self.photos))
                 case .failure(let error):
                     print("[ImagesListService]: \(error.localizedDescription)")
-                    completion(.failure(error))
                 }
                 self.task = nil
+                guard var lastLoadedPage = self.lastLoadedPage else { return }
+                lastLoadedPage += 1
             }
         }
         
@@ -65,16 +61,23 @@ final class ImagesListService {
     }
     
     private func createImageListRequest(_ page: Int) -> URLRequest? {
-        guard let url = URL(string: "\(Constants.defaultBaseURL?.absoluteString ?? "https://api.unsplash.com")/photos?page=\(page)") else { return nil }
+        let url = URL(string: "https://api.unsplash.com/photos?page=\(page)")
         
-        let request = URLRequest(url: url)
+        guard
+            let token = OAuth2TokenStorage.shared.token,
+            let url = url
+        else { return nil }
+        
+        var request = URLRequest(url: url)
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
         return request
     }
     
     struct Photo {
         let id: String
         let size: CGSize
-        let createdAt: Date?
+        let createdAt: String
         let welcomeDescription: String?
         let thumbImageURL: String
         let largeImageURL: String
@@ -85,7 +88,7 @@ final class ImagesListService {
         let id: String
         let width: Int
         let height: Int
-        let createdAt: Date?
+        let createdAt: String
         let description: String?
         let urls: [String: String]
         let isLiked: Bool
@@ -101,3 +104,4 @@ final class ImagesListService {
         }
     }
 }
+

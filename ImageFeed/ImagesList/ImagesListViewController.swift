@@ -1,12 +1,13 @@
 import UIKit
+import Kingfisher
 
 final class ImagesListViewController: UIViewController {
     // MARK: - Outlets
     @IBOutlet private weak var tableView: UITableView!
     
     // MARK: - Private Properties
-    private let photosName: [String] = Array(0..<20).map{ "\($0)" }
     private let imagesService = ImagesListService.shared
+    private var photos: [Photo] = []
     
     private lazy var dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -59,6 +60,16 @@ final class ImagesListViewController: UIViewController {
             cell.likeButton.setImage(like, for: .normal)
         }
     }
+    
+    struct Photo {
+        let id: String
+        let size: CGSize
+        let createdAt: String
+        let welcomeDescription: String?
+        let thumbImageURL: String
+        let largeImageURL: String
+        let isLiked: Bool
+    }
 }
 
 
@@ -86,13 +97,13 @@ extension ImagesListViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView,
                    willDisplay cell: UITableViewCell,
                    forRowAt indexPath: IndexPath) {
-        if indexPath.row + 1 == photosName.count {
-            
+        if indexPath.row + 1 == photos.count {
+            imagesService.fetchPhotosNextPage()
         }
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return photosName.count
+        return photos.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
