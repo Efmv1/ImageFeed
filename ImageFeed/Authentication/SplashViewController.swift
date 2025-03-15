@@ -71,13 +71,6 @@ final class SplashViewController: UIViewController {
         authViewController.modalPresentationStyle = .fullScreen
         
         show(authViewController, sender: nil)
-        
-//        let navigationController = storyboard.instantiateViewController(
-//            withIdentifier: "NavigationController"
-//        )
-//        navigationController.modalPresentationStyle = .fullScreen
-//        
-//        present(navigationController, animated: true)
     }
 }
 

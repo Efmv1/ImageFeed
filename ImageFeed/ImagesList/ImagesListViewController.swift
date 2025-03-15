@@ -6,6 +6,7 @@ final class ImagesListViewController: UIViewController {
     
     // MARK: - Private Properties
     private let photosName: [String] = Array(0..<20).map{ "\($0)" }
+    private let imagesService = ImagesListService.shared
     
     private lazy var dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -49,7 +50,9 @@ final class ImagesListViewController: UIViewController {
         cell.likeButton.setTitle("", for: .normal)
         
         
-        guard let like = UIImage(named: "active"), let nonLike = UIImage(named: "nonActive") else { return }
+        guard let like = UIImage(named: "active"),
+              let nonLike = UIImage(named: "nonActive")
+        else { return }
         if indexPath.row % 2 != 0 {
             cell.likeButton.setImage(nonLike, for: .normal)
         } else {
@@ -80,6 +83,14 @@ extension ImagesListViewController: UITableViewDelegate {
 
 // MARK: - UITableViewDataSource
 extension ImagesListViewController: UITableViewDataSource {
+    func tableView(_ tableView: UITableView,
+                   willDisplay cell: UITableViewCell,
+                   forRowAt indexPath: IndexPath) {
+        if indexPath.row + 1 == photosName.count {
+            
+        }
+    }
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return photosName.count
     }
