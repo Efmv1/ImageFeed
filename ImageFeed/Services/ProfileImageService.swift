@@ -60,6 +60,12 @@ final class ProfileImageService {
         task.resume()
     }
     
+    func logoutProfile() {
+        avatarURL = nil
+        
+        ProfileService.shared.profileInfo = nil
+    }
+    
     private func createProfileImageRequest(_ username: String) -> URLRequest? {
         let url = URL(string: "\(Constants.defaultBaseURL?.absoluteString ?? "https://api.unsplash.com")/users/\(username)")
         

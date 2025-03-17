@@ -32,6 +32,7 @@
 		AF9EC19C2C75ED0F00BB6E73 /* ImagesListCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF9EC19B2C75ED0F00BB6E73 /* ImagesListCell.swift */; };
 		AF9F90C62D40F6AA00FB30A8 /* WebViewViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF9F90C52D40F6AA00FB30A8 /* WebViewViewController.swift */; };
 		AFAEB65C2D82CCCD000EFED2 /* ImagesListService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFAEB65B2D82CCCD000EFED2 /* ImagesListService.swift */; };
+		AFC744202D87B939004BB4EB /* ProfileLogoutService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFC7441F2D87B939004BB4EB /* ProfileLogoutService.swift */; };
 		AFE91B542D7DB00F00F0A164 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = AFE91B532D7DB00F00F0A164 /* Kingfisher */; };
 /* End PBXBuildFile section */
 
@@ -72,6 +73,7 @@
 		AF9F90C52D40F6AA00FB30A8 /* WebViewViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebViewViewController.swift; sourceTree = "<group>"; };
 		AFAEB65B2D82CCCD000EFED2 /* ImagesListService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagesListService.swift; sourceTree = "<group>"; };
 		AFC744122D85CB65004BB4EB /* ImageFeedTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ImageFeedTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		AFC7441F2D87B939004BB4EB /* ProfileLogoutService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileLogoutService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -124,6 +126,7 @@
 				AF03791D2D720E6B00FDF9EA /* ProfileImageService.swift */,
 				AF234CD02D806D62000EE9CC /* AuthViewControllerDelegate.swift */,
 				AFAEB65B2D82CCCD000EFED2 /* ImagesListService.swift */,
+				AFC7441F2D87B939004BB4EB /* ProfileLogoutService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -307,6 +310,7 @@
 				AF03791E2D720E6B00FDF9EA /* ProfileImageService.swift in Sources */,
 				AF455EE12D53DBD200CF0806 /* SplashViewController.swift in Sources */,
 				AF601EB92D36DB6C006EA47F /* AuthViewController.swift in Sources */,
+				AFC744202D87B939004BB4EB /* ProfileLogoutService.swift in Sources */,
 				AF8023FE2D43BB8E0003566F /* WebViewViewControllerDelegate.swift in Sources */,
 				AF443C322D7071E900222898 /* UIBlockingProgressHUD.swift in Sources */,
 				AF601EB62D2FDDE3006EA47F /* Constants.swift in Sources */,

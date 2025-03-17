@@ -35,8 +35,9 @@ final class ProfileViewController: UIViewController {
     
     private let profileService = ProfileService.shared
     private var profileImageServiceObserver: NSObjectProtocol?
+    private let logoutService = ProfileLogoutService.shared
     
-    // MARK: - View Life Cycles    
+    // MARK: - View Life Cycles
     override func viewDidLoad() {
         super.viewDidLoad()
         profileImageServiceObserver = NotificationCenter.default
@@ -55,15 +56,15 @@ final class ProfileViewController: UIViewController {
     
     // MARK: - Private Methods
     private func updateAvatar() {
-            guard
-                let profileImageURL = ProfileImageService.shared.avatarURL,
-                let url = URL(string: profileImageURL)
-            else { return }
+        guard
+            let profileImageURL = ProfileImageService.shared.avatarURL,
+            let url = URL(string: profileImageURL)
+        else { return }
         imageView.kf.indicatorType = .activity
         let processor = RoundCornerImageProcessor(cornerRadius: 61)
         imageView.kf.setImage(with: url,
                               options: [.processor(processor)])
-        }
+    }
     
     private func presentProfile() {
         updateProfileDetails()
@@ -111,11 +112,11 @@ final class ProfileViewController: UIViewController {
     
     @objc private func didExitButtonTaped() {
         for view in view.subviews {
-            if view is UILabel {
-                view.removeFromSuperview()
-            }
+            view.removeFromSuperview()
         }
         
-        imageView.image = UIImage(named: "stub")
+        logoutService.logout()
+        
+        dismiss(animated: true)
     }
 }

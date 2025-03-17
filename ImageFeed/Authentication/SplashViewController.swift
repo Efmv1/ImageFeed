@@ -18,13 +18,16 @@ final class SplashViewController: UIViewController {
         presentSplashView()
         
         if tokenStorage.token != nil {
+            UIBlockingProgressHUD.show()
+            ImagesListService.shared.fetchPhotosNextPage()
             profileService.fetchProfile() { [weak self] result in
                 guard let self = self else { return }
                 switch result {
                 case .success(let data):
-                    showTabBar()
+                    self.showTabBar()
                     self.profileService.profileInfo = data
-                    profileImageService.fetchProfileImageURL(username: data.username) { result in
+                    self.profileImageService.fetchProfileImageURL(username: data.username)
+                    { result in
                         switch result {
                         case .success(_):
                             break

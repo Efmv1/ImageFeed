@@ -6,12 +6,12 @@ final class ImagesListService {
     
     private(set) var photos: [Photo] = []
     
-    private(set) var lastLoadedPage: Int?
+    private(set) var lastLoadedPage = 0
     private var task: URLSessionTask?
     static let didChangeNotification = Notification.Name(rawValue: "ImagesListServiceDidChange")
     
     func fetchPhotosNextPage() {
-        let nextPage = lastLoadedPage ?? 0 + 1
+        let nextPage = lastLoadedPage + 1
         
         assert(Thread.isMainThread)
         guard task == nil else {
@@ -41,23 +41,91 @@ final class ImagesListService {
                                                  isLiked: item.isLiked))
                     }
                     
-                    
                     NotificationCenter.default
                         .post(
                             name: ImagesListService.didChangeNotification,
                             object: self,
                             userInfo: ["Photos": self.photos as Any])
+                    UIBlockingProgressHUD.dismiss()
+                    
+                    self.pageDownloaded()
                 case .failure(let error):
                     print("[ImagesListService]: \(error.localizedDescription)")
+                    UIBlockingProgressHUD.dismiss()
                 }
                 self.task = nil
-                guard var lastLoadedPage = self.lastLoadedPage else { return }
-                lastLoadedPage += 1
             }
         }
         
         self.task = task
         task.resume()
+    }
+    
+    func changeLike(photoId: String, isLike: Bool, _ completion: @escaping (Result<Void, Error>) -> Void) {
+        assert(Thread.isMainThread)
+        guard task == nil else {
+            print("[ImagesListService]: Request already in work")
+            return
+        }
+        
+        guard let request = createLikeRequest(photoId, isLike) else {
+            assertionFailure("[ImagesListService]: Failed to create URL")
+            return
+        }
+        
+        let task = URLSession.shared.data(for: request
+        ){ [weak self] result in
+            guard let self = self else { return }
+            DispatchQueue.main.async {
+                switch result {
+                case .success(_):
+                    print("[ImagesListService]: Like switched")
+                    completion(.success(Void()))
+                    
+                    if let index = self.photos.firstIndex(where: { $0.id == photoId }) {
+                        let photo = self.photos[index]
+                        let newPhoto = Photo(
+                            id: photo.id,
+                            size: photo.size,
+                            createdAt: photo.createdAt,
+                            welcomeDescription: photo.welcomeDescription,
+                            thumbImageURL: photo.thumbImageURL,
+                            largeImageURL: photo.largeImageURL,
+                            isLiked: !photo.isLiked
+                        )
+                        
+                        self.photos.remove(at: index)
+                        self.photos.insert(newPhoto, at: index)
+                    }
+                case .failure(let error):
+                    print("[ImagesListService]: \(error.localizedDescription)")
+                    completion(.failure(error))
+                }
+                self.task = nil
+            }
+        }
+        
+        self.task = task
+        task.resume()
+    }
+    
+    func deletePhotos() {
+        photos.removeAll()
+    }
+    
+    private func createLikeRequest(_ photoId: String, _ isLike: Bool) -> URLRequest? {
+        let url = URL(string: "https://api.unsplash.com/photos/\(photoId)/like")
+        
+        guard
+            let token = OAuth2TokenStorage.shared.token,
+            let url = url
+        else { return nil }
+        
+        var request = URLRequest(url: url)
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.httpMethod = isLike ? "POST" : "DELETE"
+        
+        return request
     }
     
     private func createImageListRequest(_ page: Int) -> URLRequest? {
@@ -72,6 +140,10 @@ final class ImagesListService {
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         
         return request
+    }
+    
+    private func pageDownloaded() {
+        lastLoadedPage += 1
     }
     
     struct Photo {

@@ -1,19 +1,10 @@
 import UIKit
+import Kingfisher
 
 final class SingleImageViewController: UIViewController {
-    // MARK: - Public Properties
-    var image: UIImage? {
-        didSet {
-            guard isViewLoaded, let image = image else { return }
-            fullscreenImage.image = image
-            fullscreenImage.frame.size = image.size
-            rescaleAndCenterImageInScrollView(image: image)
-        }
-    }
-    
     // MARK: - Outlets
     @IBOutlet private var backButton: UIButton!
-    @IBOutlet private var fullscreenImage: UIImageView!
+    @IBOutlet var fullscreenImage: UIImageView!
     
     @IBOutlet private var shareButton: UIButton!
     
@@ -26,26 +17,37 @@ final class SingleImageViewController: UIViewController {
         scrollView.minimumZoomScale = 0.1
         scrollView.maximumZoomScale = 1.25
         
-        guard let image = image else { return }
-        fullscreenImage.image = image
-        fullscreenImage.frame.size = image.size
-        rescaleAndCenterImageInScrollView(image: image)
+        
+        guard let url = imageURL else { return }
+        fullscreenImage.kf.indicatorType = .activity
+        fullscreenImage.kf.setImage(with: URL(string: url)) { [weak self] result in
+            switch result {
+            case .success:
+                guard let image = self?.fullscreenImage.image else { return }
+                self?.fullscreenImage.frame.size = image.size
+                self?.rescaleAndCenterImageInScrollView(image: image)
+                UIBlockingProgressHUD.dismiss()
+            case .failure(let error):
+                print("[SingleImageViewController]: \(error.localizedDescription)")
+                UIBlockingProgressHUD.dismiss()
+            }
+        }
     }
     
-    //MARK: - Actions
+    // MARK: - Actions
     @IBAction private func didTapBackButton(_ sender: UIButton) {
         dismiss(animated: true, completion: nil)
     }
     
     @IBAction func didTapShareButton(_ sender: UIButton) {
-        guard let image = image else { return }
+        guard let image = fullscreenImage.image else { return }
         let share = UIActivityViewController(
             activityItems: [image],
             applicationActivities: nil)
         present(share, animated: true, completion: nil)
     }
     
-    //MARK: - Private Methods
+    // MARK: - Private Methods
     private func rescaleAndCenterImageInScrollView(image: UIImage) {
         let minZoomScale = scrollView.minimumZoomScale
         let maxZoomScale = scrollView.maximumZoomScale
@@ -63,6 +65,9 @@ final class SingleImageViewController: UIViewController {
         let y = (newContentSize.height - visibleRectSize.height) / 2
         scrollView.setContentOffset(CGPoint(x: x, y: y), animated: false)
     }
+    
+    // MARK: - Public Properties
+    var imageURL: String?
 }
 
 extension SingleImageViewController: UIScrollViewDelegate {
