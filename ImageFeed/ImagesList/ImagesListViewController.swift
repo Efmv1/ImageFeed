@@ -10,6 +10,7 @@ final class ImagesListViewController: UIViewController {
     private var imagesServiceObserver: NSObjectProtocol?
     private var photos: [ImagesListService.Photo] = []
     
+    private let dateDecoder = ISO8601DateFormatter()
     private lazy var dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateStyle = .long
@@ -24,19 +25,21 @@ final class ImagesListViewController: UIViewController {
         let oldCount = photos.count
         let newCount = imagesService.photos.count
         if oldCount != newCount {
-            photos = imagesService.photos
             tableView.performBatchUpdates {
+                photos = imagesService.photos
                 let indexPaths = (oldCount..<newCount).map { i in
                     IndexPath(row: i, section: 0)
                 }
                 tableView.insertRows(at: indexPaths, with: .automatic)
-            } completion: { _ in }
+            }
         }
     }
     
     // MARK: - View Life Cycles
     override func viewDidLoad() {
         super.viewDidLoad()
+        imagesService.fetchPhotosNextPage()
+        
         imagesServiceObserver = NotificationCenter.default
             .addObserver(
                 forName: ImagesListService.didChangeNotification,
@@ -83,7 +86,7 @@ final class ImagesListViewController: UIViewController {
                 }
             }
         
-        guard let date = ISO8601DateFormatter().date(from: photos[indexPath.row].createdAt)
+        guard let date = dateDecoder.date(from: photos[indexPath.row].createdAt)
         else { return }
         cell.dateLabel.text = dateFormatter.string(from: date)
         

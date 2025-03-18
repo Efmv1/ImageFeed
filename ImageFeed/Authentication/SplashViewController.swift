@@ -19,7 +19,6 @@ final class SplashViewController: UIViewController {
         
         if tokenStorage.token != nil {
             UIBlockingProgressHUD.show()
-            ImagesListService.shared.fetchPhotosNextPage()
             profileService.fetchProfile() { [weak self] result in
                 guard let self = self else { return }
                 switch result {
