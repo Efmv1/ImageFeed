@@ -111,12 +111,20 @@ final class ProfileViewController: UIViewController {
     }
     
     @objc private func didExitButtonTaped() {
-        for view in view.subviews {
-            view.removeFromSuperview()
-        }
-        
-        logoutService.logout()
-        
-        dismiss(animated: true)
+        let alert = UIAlertController(
+            title: "Пока, пока!",
+            message: "Уверены что хотите выйти?",
+            preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Да", style: .default, handler: { [weak self] _ in
+            guard let self else { return }
+            for view in self.view.subviews {
+                view.removeFromSuperview()
+            }
+            
+            self.logoutService.logout()
+            dismiss(animated: true)
+        }))
+        alert.addAction(UIAlertAction(title: "Нет", style: .default))
+        present(alert, animated: true, completion: nil)
     }
 }

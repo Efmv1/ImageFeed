@@ -70,15 +70,18 @@ final class SplashViewController: UIViewController {
         let storyboard = UIStoryboard(name: "Main", bundle: .main)
         guard let authViewController = storyboard.instantiateViewController(withIdentifier: "AuthViewController") as? AuthViewController else { return }
         authViewController.delegate = self
-        authViewController.modalPresentationStyle = .fullScreen
         
-        show(authViewController, sender: nil)
+        guard let navigationController = storyboard.instantiateViewController(withIdentifier: "NavigationController") as? UINavigationController else { return }
+        navigationController.modalPresentationStyle = .fullScreen
+        navigationController.viewControllers = [authViewController]
+        
+        present(navigationController, animated: true)
     }
 }
 
 extension SplashViewController: AuthViewControllerDelegate {
-    func didAuthenticate(_ vc: AuthViewController) {
-        vc.dismiss(animated: true)
+    func didAuthenticate() {
+        dismiss(animated: true)
         
         showTabBar()
     }

@@ -16,6 +16,7 @@ final class ImagesListViewController: UIViewController {
         formatter.dateStyle = .long
         formatter.timeStyle = .none
         formatter.locale = Locale(identifier: "ru_RU")
+        formatter.dateFormat = "dd MMMM yyyy"
         return formatter
     }()
     
@@ -76,14 +77,11 @@ final class ImagesListViewController: UIViewController {
         cell.imageTab.kf.setImage(
             with: URL(string: photos[indexPath.row].thumbImageURL),
             placeholder: UIImage(named: "imageStub")){ [weak self] result in
-                guard let self = self else { return }
                 switch result {
                 case .success(let image):
                     if cell.imageTab.image != image.image {
                         cell.imageTab.image = image.image
-                    }
-                    DispatchQueue.main.async {
-                        self.tableView.reloadRows(at: [indexPath], with: .none)
+                        self?.tableView.reloadRows(at: [indexPath], with: .automatic)
                     }
                 case .failure(let error):
                     print("[ImageListViewController]: \(error.localizedDescription)")

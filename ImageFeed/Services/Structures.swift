@@ -54,7 +54,7 @@ struct PhotoResult: Codable {
     let height: Int
     let createdAt: String?
     let description: String?
-    let urls: [String: String]
+    let urls: UrlsResult
     let isLiked: Bool
     
     private enum CodingKeys: String, CodingKey {
@@ -65,5 +65,10 @@ struct PhotoResult: Codable {
         case description
         case urls
         case isLiked = "liked_by_user"
+    }
+    
+    struct UrlsResult: Codable {
+        let thumb: String
+        let full: String
     }
 }
