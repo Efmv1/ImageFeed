@@ -638,7 +638,7 @@
 		};
 		AFE91B522D7DB00F00F0A164 /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/onevcat/Kingfisher?ysclid=m81je1ocrj198280970";
+			repositoryURL = "https://github.com/onevcat/Kingfisher";
 			requirement = {
 				kind = exactVersion;
 				version = 8.3.0;
