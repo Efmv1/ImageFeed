@@ -8,7 +8,7 @@ final class ImagesListViewController: UIViewController {
     // MARK: - Private Properties
     private let imagesService = ImagesListService.shared
     private var imagesServiceObserver: NSObjectProtocol?
-    private var photos: [ImagesListService.Photo] = []
+    private var photos: [Photo] = []
     
     private let dateDecoder = ISO8601DateFormatter()
     private lazy var dateFormatter: DateFormatter = {
@@ -58,8 +58,7 @@ final class ImagesListViewController: UIViewController {
                 let viewController = segue.destination as? SingleImageViewController,
                 let index = sender as? Int
             else {
-                assertionFailure("[ImageListViewController]: Invalid segue destination")
-                return
+                fatalError("[ImageListViewController]: Invalid segue destination")
             }
             
             viewController.imageURL = photos[index].largeImageURL
@@ -77,14 +76,20 @@ final class ImagesListViewController: UIViewController {
         cell.imageTab.kf.setImage(
             with: URL(string: photos[indexPath.row].thumbImageURL),
             placeholder: UIImage(named: "imageStub")){ [weak self] result in
-                guard let self else { return }
+                guard let self = self else { return }
                 switch result {
-                case .success(_):
-                    self.tableView.reloadRows(at: [indexPath], with: .none)
+                case .success(let image):
+                    if cell.imageTab.image != image.image {
+                        cell.imageTab.image = image.image
+                    }
+                    DispatchQueue.main.async {
+                        self.tableView.reloadRows(at: [indexPath], with: .none)
+                    }
                 case .failure(let error):
                     print("[ImageListViewController]: \(error.localizedDescription)")
                 }
             }
+        
         
         guard let date = dateDecoder.date(from: photos[indexPath.row].createdAt)
         else { return }
@@ -178,6 +183,5 @@ extension ImagesListViewController: ImagesListCellDelegate {
                 }
             }
         }
-        
     }
 }

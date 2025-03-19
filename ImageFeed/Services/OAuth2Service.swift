@@ -1,13 +1,5 @@
 import Foundation
 
-struct OAuthTokenResponseBody: Decodable {
-    let accessToken: String
-    
-    private enum CodingKeys: String, CodingKey {
-        case accessToken = "access_token"
-    }
-}
-
 enum AuthServiceError: Error {
     case invalidRequest
 }
@@ -42,8 +34,7 @@ final class OAuth2Service {
         lastCode = code
         
         guard let url = makeOAuthTokenURL(code: code) else {
-            assertionFailure("[OAuthService]: Failed to create URL")
-            return
+            fatalError("[OAuthService]: Failed to create URL")
         }
         
         var request = URLRequest(url: url)

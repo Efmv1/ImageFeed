@@ -6,6 +6,7 @@ final class ImagesListCell: UITableViewCell {
         super.prepareForReuse()
         
         imageTab.kf.cancelDownloadTask()
+        imageTab.image = nil
     }
     
     // MARK: - Outlets

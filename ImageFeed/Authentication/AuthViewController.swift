@@ -8,8 +8,7 @@ final class AuthViewController: UIViewController {
             guard
                 let viewController = segue.destination as? WebViewViewController
             else {
-                assertionFailure("[AuthViewController]: Invalid segue destination")
-                return
+                fatalError("[AuthViewController]: Invalid segue destination")
             }
             
             viewController.delegate = self
