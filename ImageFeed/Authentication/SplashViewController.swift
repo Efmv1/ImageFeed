@@ -18,13 +18,15 @@ final class SplashViewController: UIViewController {
         presentSplashView()
         
         if tokenStorage.token != nil {
+            UIBlockingProgressHUD.show()
             profileService.fetchProfile() { [weak self] result in
                 guard let self = self else { return }
                 switch result {
                 case .success(let data):
-                    showTabBar()
+                    self.showTabBar()
                     self.profileService.profileInfo = data
-                    profileImageService.fetchProfileImageURL(username: data.username) { result in
+                    self.profileImageService.fetchProfileImageURL(username: data.username)
+                    { result in
                         switch result {
                         case .success(_):
                             break
@@ -68,22 +70,18 @@ final class SplashViewController: UIViewController {
         let storyboard = UIStoryboard(name: "Main", bundle: .main)
         guard let authViewController = storyboard.instantiateViewController(withIdentifier: "AuthViewController") as? AuthViewController else { return }
         authViewController.delegate = self
-        authViewController.modalPresentationStyle = .fullScreen
         
-        show(authViewController, sender: nil)
+        guard let navigationController = storyboard.instantiateViewController(withIdentifier: "NavigationController") as? UINavigationController else { return }
+        navigationController.modalPresentationStyle = .fullScreen
+        navigationController.viewControllers = [authViewController]
         
-//        let navigationController = storyboard.instantiateViewController(
-//            withIdentifier: "NavigationController"
-//        )
-//        navigationController.modalPresentationStyle = .fullScreen
-//        
-//        present(navigationController, animated: true)
+        present(navigationController, animated: true)
     }
 }
 
 extension SplashViewController: AuthViewControllerDelegate {
-    func didAuthenticate(_ vc: AuthViewController) {
-        vc.dismiss(animated: true)
+    func didAuthenticate() {
+        dismiss(animated: true)
         
         showTabBar()
     }

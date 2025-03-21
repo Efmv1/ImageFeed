@@ -35,8 +35,9 @@ final class ProfileViewController: UIViewController {
     
     private let profileService = ProfileService.shared
     private var profileImageServiceObserver: NSObjectProtocol?
+    private let logoutService = ProfileLogoutService.shared
     
-    // MARK: - View Life Cycles    
+    // MARK: - View Life Cycles
     override func viewDidLoad() {
         super.viewDidLoad()
         profileImageServiceObserver = NotificationCenter.default
@@ -55,15 +56,15 @@ final class ProfileViewController: UIViewController {
     
     // MARK: - Private Methods
     private func updateAvatar() {
-            guard
-                let profileImageURL = ProfileImageService.shared.avatarURL,
-                let url = URL(string: profileImageURL)
-            else { return }
+        guard
+            let profileImageURL = ProfileImageService.shared.avatarURL,
+            let url = URL(string: profileImageURL)
+        else { return }
         imageView.kf.indicatorType = .activity
         let processor = RoundCornerImageProcessor(cornerRadius: 61)
         imageView.kf.setImage(with: url,
                               options: [.processor(processor)])
-        }
+    }
     
     private func presentProfile() {
         updateProfileDetails()
@@ -110,12 +111,20 @@ final class ProfileViewController: UIViewController {
     }
     
     @objc private func didExitButtonTaped() {
-        for view in view.subviews {
-            if view is UILabel {
+        let alert = UIAlertController(
+            title: "Пока, пока!",
+            message: "Уверены что хотите выйти?",
+            preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Да", style: .default, handler: { [weak self] _ in
+            guard let self else { return }
+            for view in self.view.subviews {
                 view.removeFromSuperview()
             }
-        }
-        
-        imageView.image = UIImage(named: "stub")
+            
+            self.logoutService.logout()
+            dismiss(animated: true)
+        }))
+        alert.addAction(UIAlertAction(title: "Нет", style: .default))
+        present(alert, animated: true, completion: nil)
     }
 }

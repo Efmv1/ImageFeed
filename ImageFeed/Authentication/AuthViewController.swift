@@ -8,8 +8,7 @@ final class AuthViewController: UIViewController {
             guard
                 let viewController = segue.destination as? WebViewViewController
             else {
-                assertionFailure("[AuthViewController]: Invalid segue destination")
-                return
+                fatalError("[AuthViewController]: Invalid segue destination")
             }
             
             viewController.delegate = self
@@ -25,6 +24,8 @@ final class AuthViewController: UIViewController {
     // MARK: - View Life Cycles
     override func viewDidLoad() {
         configureBackButton()
+        
+        print("\(String(describing: delegate))")
     }
     
     // MARK: - Private Methods
@@ -41,7 +42,7 @@ final class AuthViewController: UIViewController {
 
 extension AuthViewController: WebViewViewControllerDelegate {
     func webViewViewController(_ vc: WebViewViewController, didAuthenticateWithCode code: String) {
-        vc.dismiss(animated: true)
+        navigationController?.popViewController(animated: true)
         UIBlockingProgressHUD.show()
         
         oauth2Service.fetchOAuthToken(code: code) { [weak self] result in
@@ -50,7 +51,7 @@ extension AuthViewController: WebViewViewControllerDelegate {
             case .success(let token):
                 OAuth2TokenStorage.shared.newToken(token)
                 UIBlockingProgressHUD.dismiss()
-                delegate?.didAuthenticate(self)
+                delegate?.didAuthenticate()
             case .failure(let error):
                 print("[AuthViewController]: \(error.localizedDescription)")
                 UIBlockingProgressHUD.dismiss()

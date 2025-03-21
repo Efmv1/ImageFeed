@@ -8,22 +8,6 @@ final class ProfileService {
     private var task: URLSessionTask?
     var profileInfo: Profile?
     
-    
-    struct ProfileResult: Decodable {
-        let username: String
-        var name: String
-        let bio: String?
-    }
-    
-    struct Profile {
-        let username: String
-        let name: String
-        var loginName: String {
-            "@\(username)"
-        }
-        let bio: String?
-    }
-    
     enum ProfileServiceError: Error {
         case invalidRequest
     }
@@ -37,8 +21,7 @@ final class ProfileService {
         }
         
         guard let request = createProfileRequest() else {
-            assertionFailure("[ProfileService]: Failed to create URL")
-            return
+            fatalError("[ProfileService]: Failed to create URL")
         }
         let task = URLSession.shared.objectTask(
             for: request

@@ -1,14 +1,6 @@
 import Foundation
 
 final class ProfileImageService {
-    struct UserResult: Codable {
-        let items: [String: String]
-        
-        private enum CodingKeys: String, CodingKey {
-            case items = "profile_image"
-        }
-    }
-    
     enum ProfileImageServiceError: Error {
         case invalidRequest
         case unwrappingError
@@ -31,8 +23,7 @@ final class ProfileImageService {
         }
         
         guard let request = createProfileImageRequest(username) else {
-            assertionFailure("[ProfileImageService]: Failed to create URL")
-            return
+            fatalError("[ProfileImageService]: Failed to create URL")
         }
         let task = URLSession.shared.objectTask(
             for: request
@@ -58,6 +49,12 @@ final class ProfileImageService {
         
         self.task = task
         task.resume()
+    }
+    
+    func logoutProfile() {
+        avatarURL = nil
+        
+        ProfileService.shared.profileInfo = nil
     }
     
     private func createProfileImageRequest(_ username: String) -> URLRequest? {
